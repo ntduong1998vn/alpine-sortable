@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reset-css@5.0.2/reset.min.css">
+  <title>Vite App</title>
+</head>
+
+<body>
+  <div class="container">
+
+    <div class="drag-and-drop" x-data="{ 
+      items: [],  
+    }" x-init="$watch('items', (value, oldValue) => console.log('New', value,'Old', oldValue))">
+      <div class="drag-and-drop__container drag-and-drop__container--from">
+        <h3 class="drag-and-drop__title">From</h3>
+        <ul class="drag-and-drop__items" x-sort x-sort:config="{
+          group: {
+              name: 'shared',
+              pull: 'clone',
+              put: false // Do not allow items to be put into this list
+          },
+          animation: 150,
+          sort: false, // To disable sorting: set sort to false
+          onEnd: (evt) => {
+            const item = $(evt.item)
+
+            if(evt.pullMode === 'clone') {
+              evt.item.remove()
+              items.splice(evt.newDraggableIndex,0,{
+                id: crypto.randomUUID(),
+                type: item.data('type'),
+                value: crypto.randomUUID()
+              })
+            }
+
+            // Reset draged item style
+            item.removeAttr('draggable').removeAttr('style')
+          }
+      }">
+          <!-- loop through the items -->
+          <li id="item-1" class="drag-and-drop__item" data-type="1" x-sort:item="1">
+            Your Item #1
+          </li>
+          <li id="item-2" class="drag-and-drop__item" data-type="2" x-sort:item="2">
+            Your Item #2
+          </li>
+          <li id="item-3" class="drag-and-drop__item" data-type="3" x-sort:item="3">
+            Your Item #3
+          </li>
+          <li id="item-4" class="drag-and-drop__item" data-type="4" x-sort:item="4">
+            Your Item #4
+          </li>
+          <li id="item-5" class="drag-and-drop__item" data-type="5" x-sort:item="5">
+            Your Item #5
+          </li>
+          <li id="item-6" class="drag-and-drop__item" data-type="6" x-sort:item="6">
+            Your Item #6
+          </li>
+        </ul>
+      </div>
+      <div class="drag-and-drop__divider">⇄</div>
+      <div class="drag-and-drop__container drag-and-drop__container--to">
+        <h3 class="drag-and-drop__title">To</h3>
+        <ul class="drag-and-drop__items" x-sort x-sort:config="{
+          group: 'shared',
+          animation: 150,
+          onSort: (evt) => {
+            if(evt.pullMode != 'clone'){
+              const a = Object.assign({}, items[evt.oldIndex]);
+              const b = Object.assign({}, items[evt.newIndex]);
+
+              items[evt.oldIndex] = b
+              items[evt.newIndex] = a
+            }
+          }
+        }">
+          <template x-for="(item,index) in items" :key="item.id">
+            <li x-text="`Type ${item.type}: ${item.id}`"></li>
+          </template>
+        </ul>
+      </div>
+    </div>
+
+
+    <div id="multi">
+      <div class="layer tile" id="1">
+        <div class="tile__name">Group 1</div>
+        <div class="tile__list">
+          <img src="https://via.placeholder.com/50x50&text=01">
+          <!-- -->
+          <img src="https://via.placeholder.com/50x50&text=02">
+          <!-- -->
+          <img src="https://via.placeholder.com/50x50&text=03">
+          <!-- -->
+          <img src="https://via.placeholder.com/50x50&text=04">
+        </div>
+        <button class="add-el">ADD ELEMENT TO GROUP 1</button>
+      </div>
+      <div class="layer tile" id="2">
+        <div class="tile__name">Group 2</div>
+        <div class="tile__list">
+          <img src="https://via.placeholder.com/50x50&text=05">
+          <!-- -->
+          <img src="https://via.placeholder.com/50x50&text=06">
+          <!-- -->
+          <img src="https://via.placeholder.com/50x50&text=07">
+        </div>
+        <button class="add-el">ADD ELEMENT TO GROUP 2</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
+    integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+  <script type="module" src="/main.js"></script>
+</body>
+
+</html>
