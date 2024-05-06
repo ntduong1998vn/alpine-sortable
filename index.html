@@ -23,6 +23,7 @@
         name: 'Thanh'
       }
     ],
+    deleteStudentId: null,
     handleSubmit(e) {
       console.log(this.students)
     },
@@ -32,11 +33,18 @@
         name: ''
       })
     },
-    handleClick(type, index) {
+    editStudentName(type, index) {
       this.students[index].is_edit = true
       $nextTick(() => { 
         this.$root.querySelector(`#${type}-${index}`).focus();
       })
+    },
+    deleteStudent(studentId) {
+      this.deleteStudentId = studentId
+      $($refs.deleteModal).modal('show')
+    },
+    handleDeleteStudent() {
+      console.log('Deleted Student ID: '+ this.deleteStudentId)
     }
   }">
     <form @submit.prevent="handleSubmit" x-ref="form">
@@ -56,15 +64,15 @@
                 <input x-model="student.name" @click.outside="students[index].is_edit = false" :id="'student-name-'+index"/>
               </td>
 
-              <td x-show="!student.is_edit" x-text="student.name" @click="handleClick('student-name', index)" ></td>
-              <td><button type="button" class="btn btn-danger">Delete</button></td>
+              <td x-show="!student.is_edit" x-text="student.name" @click="editStudentName('student-name', index)"></td>
+              <td><button type="button" class="btn btn-danger" @click="deleteStudent(student.id)">Delete</button></td>
             </tr>
           </template>
         </tbody>
       </table>
       <div class="row">
         <div class="col">
-          <button type="button" class="btn btn-primary" @click="addStudent">Add</button>
+          <button type="button" class="btn btn-primary" @click="addStudent" >Add</button>
         </div>
       </div>
 
@@ -73,7 +81,27 @@
           <button type="submit" class="btn btn-primary">Submit</button>
         </div>
       </div>
+
     </form>
+
+    <div class="modal fade" tabindex="-1" aria-hidden="false" x-ref="deleteModal">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" x-text="'Are you sure about deleting student with id=' + deleteStudentId">
+            ...
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-danger" @click="handleDeleteStudent">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
   </div>
 
