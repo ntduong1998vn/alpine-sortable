@@ -45,6 +45,7 @@
     },
     handleDeleteStudent() {
       console.log('Deleted Student ID: '+ this.deleteStudentId)
+      $($refs.deleteModal).modal('hide')
     }
   }">
     <form @submit.prevent="handleSubmit" x-ref="form">
