@@ -66,14 +66,16 @@
           <template x-for="(student,index) in students">
             <tr>
               <td x-text="student.id"></td>
-              <td style="width: 200px;">
-                <input x-show="student.is_edit" x-model="student.name" @click.outside="students[index].is_edit = false"
-                  :id="'student-name-'+index" />
+              <td style="width: 200px;" @click="editStudentName('student-name', index)">
+                <input x-show="student.is_edit" x-model="student.name" @click.outside="students[index].is_edit = false" type="text"
+                  :id="'student-name-'+index" autofocus/>
                 <span x-show="!student.is_edit" x-text="student.name"
-                  @click="editStudentName('student-name', index)"></span>
+                  ></span>
               </td>
 
-              <td><button type="button" class="btn btn-danger m-0" @click="deleteStudent(student.id)">Delete</button></td>
+              <td>
+                <button type="button" class="btn btn-danger m-0" @click="deleteStudent(student.id)">Delete</button>
+              </td>
             </tr>
           </template>
         </tbody>
