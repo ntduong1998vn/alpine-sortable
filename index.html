@@ -9,6 +9,11 @@
     integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
   <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reset-css@5.0.2/reset.min.css"> -->
   <title>Vite App</title>
+  <style>
+    td {
+      vertical-align: middle;
+    }
+  </style>
 </head>
 
 <body>
@@ -61,19 +66,21 @@
           <template x-for="(student,index) in students">
             <tr>
               <td x-text="student.id"></td>
-              <td x-show="student.is_edit">
-                <input x-model="student.name" @click.outside="students[index].is_edit = false" :id="'student-name-'+index"/>
+              <td style="width: 200px;">
+                <input x-show="student.is_edit" x-model="student.name" @click.outside="students[index].is_edit = false"
+                  :id="'student-name-'+index" />
+                <span x-show="!student.is_edit" x-text="student.name"
+                  @click="editStudentName('student-name', index)"></span>
               </td>
 
-              <td x-show="!student.is_edit" x-text="student.name" @click="editStudentName('student-name', index)"></td>
-              <td><button type="button" class="btn btn-danger" @click="deleteStudent(student.id)">Delete</button></td>
+              <td><button type="button" class="btn btn-danger m-0" @click="deleteStudent(student.id)">Delete</button></td>
             </tr>
           </template>
         </tbody>
       </table>
       <div class="row">
         <div class="col">
-          <button type="button" class="btn btn-primary" @click="addStudent" >Add</button>
+          <button type="button" class="btn btn-primary" @click="addStudent">Add</button>
         </div>
       </div>
 
