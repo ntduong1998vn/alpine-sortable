@@ -12,66 +12,131 @@
 </head>
 
 <body>
-  <div class="container mt-5" x-data="{
-    formItems: [
-      {
-        id: 1,
-        type: 1,
-        value: 1,
+  <div class="container mt-5">
+    <div class="drag-and-drop" x-data="{ 
+      items: [],  
+      languages: [ 'US', 'EN', 'JP', 'VN', 'GM'],
+      initBsSelect (item) {
+        $('#select-'+item.id).select2()
       },
-      {
-        id: 2,
-        type: 1,
-        value: 2,
+      getNestedSortableCfg() {
+        let items = this.items
+
+        return {
+          group: {
+            name: 'shared',
+            pull: 'clone',
+            put: false // Do not allow items to be put into this list
+          },
+          animation: 150,
+          onSort: (evt) => {
+            console.log(evt)
+            if(evt.pullMode != 'clone'){
+              const a = Alpine.raw(items[evt.oldIndex]);
+              const b = Alpine.raw(items[evt.newIndex]);
+  
+              items[evt.oldIndex] = b
+              items[evt.newIndex] = a
+            }
+          }
+        }
       },
-    ],
-    languages: [ 'US', 'EN', 'JP', 'VN', 'GM'],
-    addItem(){
-      this.formItems.push({
-        id: this.formItems.length+1,
-        type: 1,
-        value: 1,
-      })
-    },
-    initBsSelect(item){
-      $('#select-'+item.id).select2({
-        theme: 'bootstrap-5',
-        minimumResultsForSearch: Infinity
-      })
-      console.log('Hello')
-    }
-  }">
-    <div class="row">
-      <div class="col-lg-6">
-        <template x-for="(item,index) in formItems">
-          <div class="form-group">
-            <label for="lang">Language</label>
-            <select :id="'select-'+item.id" name="lang" class="form-control" x-effect="initBsSelect(item)"
-              x-model="item.value">
-              <template x-for="(lang,index) in languages">
-                <option x-text="lang" :value="index"></option>
+    }">
+      <div class="drag-and-drop__container drag-and-drop__container--from">
+        <h3 class="drag-and-drop__title">From</h3>
+        <ul class="drag-and-drop__items" x-sort x-sort:config="{
+        group: {
+            name: 'shared',
+            pull: 'clone',
+            put: false // Do not allow items to be put into this list
+        },
+        animation: 150,
+        sort: false, // To disable sorting: set sort to false
+        onEnd: (evt) => {
+          const item = $(evt.item)
+
+          if(evt.pullMode === 'clone') {
+            evt.item.remove()
+
+            items.splice(evt.newIndex,0,{
+              id: crypto.randomUUID(),
+              type: item.data('type'),
+              value: crypto.randomUUID()
+            })
+          }
+
+          // Reset draged item style
+          item.removeAttr('draggable').removeAttr('style')
+        }
+    }">
+          <!-- loop through the items -->
+          <li id="item-1" class="drag-and-drop__item" data-type="1">
+            Your Item #1
+          </li>
+          <li id="item-2" class="drag-and-drop__item" data-type="2">
+            Your Item #2
+          </li>
+          <li id="item-3" class="drag-and-drop__item" data-type="3">
+            Your Item #3
+          </li>
+          <li id="item-4" class="drag-and-drop__item" data-type="4">
+            Your Item #4
+          </li>
+          <li id="item-5" class="drag-and-drop__item" data-type="5">
+            Your Item #5
+          </li>
+          <li id="item-6" class="drag-and-drop__item" data-type="6">
+            Your Item #6
+          </li>
+        </ul>
+      </div>
+      <div class="drag-and-drop__divider">⇄</div>
+      <div class="drag-and-drop__container drag-and-drop__container--to">
+        <h3 class="drag-and-drop__title">To</h3>
+        <ul class="drag-and-drop__items" x-sort x-sort:config="{
+        group: 'shared',
+        animation: 150,
+        onSort: (evt) => {
+          if(evt.pullMode != 'clone'){
+            const a = Alpine.raw(items[evt.oldIndex]);
+            const b = Alpine.raw(items[evt.newIndex]);
+
+            items[evt.oldIndex] = b
+            items[evt.newIndex] = a
+          }
+        }
+      }">
+          <template x-for="(item,index) in items" :key="item.id + index">
+            <li class="drag-and-drop__item">
+              <template x-if="item.type == 1">
+                <select :id="'select-'+item.id" name="lang" class="form-control" x-effect="initBsSelect(item)"
+                  x-model="item.value">
+                  <template x-for="(lang,index) in languages">
+                    <option x-text="lang" :value="index"></option>
+                  </template>
+                </select>
               </template>
-            </select>
-          </div>
-        </template>
-        
-        <div class="row">
-          <button @click="addItem">Add</button>
-        </div>
+
+              <template x-if="item.type == 2">
+                <span x-text="item.value"></span> 
+              </template>
+
+              <template x-if="item.type == 3">
+                <ul class="drag-and-drop__items p-0"></ul>
+              </template>
+
+            </li>
+          </template>
+        </ul>
       </div>
     </div>
 
-  </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
+      crossorigin="anonymous">
+    </script>
 
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8"
-    crossorigin="anonymous"></script>
-
-  <script>
-    // $('#lang').selectpicker();
-  </script>
-  <script type="module" src="/main.js"></script>
+    <script type="module" src="/main.js"></script>
 </body>
 
 </html>
