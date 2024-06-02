@@ -23,11 +23,7 @@
         let items = this.items
 
         return {
-          group: {
-            name: 'shared',
-            pull: 'clone',
-            put: false // Do not allow items to be put into this list
-          },
+          group: 'shared',
           animation: 150,
           onSort: (evt) => {
             console.log(evt)
@@ -122,7 +118,7 @@
               </template>
 
               <template x-if="item.type == 3">
-                <ul class="drag-and-drop__items p-0"></ul>
+                <ul class="drag-and-drop__items p-0" x-sort x-sort:config="getNestedSortableCfg()"></ul>
               </template>
 
             </li>
