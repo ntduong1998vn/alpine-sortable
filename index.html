@@ -26,13 +26,26 @@
           group: 'shared',
           animation: 150,
           onSort: (evt) => {
-            console.log(evt)
-            if(evt.pullMode != 'clone'){
-              const a = Alpine.raw(items[evt.oldIndex]);
-              const b = Alpine.raw(items[evt.newIndex]);
-  
-              items[evt.oldIndex] = b
-              items[evt.newIndex] = a
+            if (evt.pullMode == true) {
+              // Case move item from nested to outside
+              if(evt.from.dataset.id) {
+                
+              } else {
+                const changedItemIndex = items.findIndex(item => item.id == evt.item.dataset.id)
+                let changedItem = items.splice(changedItemIndex,1)[0]
+                // Move into parent node
+                let parentNode = items.find(item => item.id == evt.to.dataset.id)
+                if(parentNode.body){
+                  parentNode.body.splice(evt.newIndex, 0, Alpine.raw(changedItem))
+                } else {
+                  parentNode.body = [Alpine.raw(changedItem)]
+                }
+              }
+
+            }
+
+            if (evt.pullMode == undefined && evt.type == 'sort') {
+
             }
           }
         }
@@ -41,30 +54,30 @@
       <div class="drag-and-drop__container drag-and-drop__container--from">
         <h3 class="drag-and-drop__title">From</h3>
         <ul class="drag-and-drop__items" x-sort x-sort:config="{
-        group: {
-            name: 'shared',
-            pull: 'clone',
-            put: false // Do not allow items to be put into this list
-        },
-        animation: 150,
-        sort: false, // To disable sorting: set sort to false
-        onEnd: (evt) => {
-          const item = $(evt.item)
+            group: {
+                name: 'shared',
+                pull: 'clone',
+                put: false // Do not allow items to be put into this list
+            },
+            animation: 150,
+            sort: false, // To disable sorting: set sort to false
+            onEnd: (evt) => {
+              const item = $(evt.item)
 
-          if(evt.pullMode === 'clone') {
-            evt.item.remove()
+              if(evt.pullMode === 'clone') {
+                evt.item.remove()
 
-            items.splice(evt.newIndex,0,{
-              id: crypto.randomUUID(),
-              type: item.data('type'),
-              value: crypto.randomUUID()
-            })
-          }
+                items.splice(evt.newIndex ,0 ,{
+                  id: crypto.randomUUID(),
+                  type: item.data('type'),
+                  value: crypto.randomUUID()
+                })
+              }
 
-          // Reset draged item style
-          item.removeAttr('draggable').removeAttr('style')
-        }
-    }">
+              // Reset draged item style
+              item.removeAttr('draggable').removeAttr('style')
+            }
+        }">
           <!-- loop through the items -->
           <li id="item-1" class="drag-and-drop__item" data-type="1">
             Your Item #1
@@ -89,21 +102,17 @@
       <div class="drag-and-drop__divider">⇄</div>
       <div class="drag-and-drop__container drag-and-drop__container--to">
         <h3 class="drag-and-drop__title">To</h3>
-        <ul class="drag-and-drop__items" x-sort x-sort:config="{
-        group: 'shared',
-        animation: 150,
-        onSort: (evt) => {
-          if(evt.pullMode != 'clone'){
-            const a = Alpine.raw(items[evt.oldIndex]);
-            const b = Alpine.raw(items[evt.newIndex]);
-
-            items[evt.oldIndex] = b
-            items[evt.newIndex] = a
+        <ul id="save2" class="drag-and-drop__items" x-sort x-sort:config="{
+          group: 'shared',
+          animation: 150,
+          onSort: (evt) => {
+            if(evt.pullMode == 'sort'){
+              swapReactiveItems(items, evt.oldIndex, evt.newIndex)
+            }
           }
-        }
-      }">
+        }">
           <template x-for="(item,index) in items" :key="item.id + index">
-            <li class="drag-and-drop__item">
+            <li class="drag-and-drop__item" :data-id="item.id">
               <template x-if="item.type == 1">
                 <select :id="'select-'+item.id" name="lang" class="form-control" x-effect="initBsSelect(item)"
                   x-model="item.value">
@@ -118,7 +127,11 @@
               </template>
 
               <template x-if="item.type == 3">
-                <ul class="drag-and-drop__items p-0" x-sort x-sort:config="getNestedSortableCfg()"></ul>
+                <ul class="drag-and-drop__items p-0" :data-id="item.id" x-sort x-sort:config="getNestedSortableCfg()">
+                  <template x-for="child in item.body">
+                    <li class="drag-and-drop__item" :data-id="child.id" x-text="child.value"></li>
+                  </template>
+                </ul>
               </template>
 
             </li>
@@ -132,6 +145,20 @@
       crossorigin="anonymous">
     </script>
 
+    <script>
+      /**
+       * 
+       * @param {HTMLElement} posA - Position A
+       * @param {HTMLElement} posB - Position B
+       **/ 
+      function swapReactiveItems(arr, posA, posB) {
+        const a = Alpine.raw(arr[posA]);
+        const b = Alpine.raw(arr[posB]);
+  
+        arr[posB] = b
+        arr[posA] = a
+      }
+    </script>
     <script type="module" src="/main.js"></script>
 </body>
 
